@@ -1,0 +1,11 @@
+Imager documentation: https://dahtah.github.io/imager/imager.html
+more Imager: https://cran.r-project.org/web/packages/imager/vignettes/gettingstarted.html#example-2-edge-detection
+ImagerExtra documentation: https://cran.r-project.org/web/packages/imagerExtra/vignettes/gettingstarted.html
+Magick documentation: https://cran.r-project.org/web/packages/magick/vignettes/intro.html
+
+Noise remove ideas: https://cran.r-project.org/web/packages/imager/vignettes/pixsets.html
+
+Noise removal paper: https://www.researchgate.net/publication/4376361_Noise_removal_and_enhancement_of_binary_images_using_morphological_operations
+
+cran binary image: https://search.r-project.org/CRAN/refmans/pliman/html/image_binary.html
+cran remove noise: https://search.r-project.org/CRAN/refmans/SpatialPack/html/denoise.html
