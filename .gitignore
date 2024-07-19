@@ -1,2 +1,4 @@
 /R/Tests
-/Python/path
+/Python/.venv
+.Rproj.user
+/Images/
