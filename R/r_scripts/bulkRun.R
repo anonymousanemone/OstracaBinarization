@@ -1,15 +1,19 @@
 library(magick)
+library(magrittr)
 library(image.binarization)
 library(imager)
 library(dplyr)
 
-n <- 38
-for (file_num in 1:n){
+sourcepath = "/Users/sophial/Documents/githubs/OstracaBinarization/Images/cropped_images/"
+writepath = "/Users/sophial/Documents/githubs/OstracaBinarization/R/Tests/binarized_with_accnum/"
+filenames = list.files(path=sourcepath, pattern="*.jpeg")
+print(filenames)
+for (f in filenames){
   #read image - using imager
-  path <- "source_images/original-1-"
-  file_type <- ".png"
-  f <- paste(path,file_num,file_type, sep="")
-  img <- load.image(f)
+  # f = "17_10_13.jpeg"
+  filesource <- paste(sourcepath,f, sep="")
+  print(filesource)
+  img <- load.image(filesource)
 
   #convert to grayscale - saturation extraction - imager
   sherd.hsl <- RGBtoHSL(img)
@@ -40,25 +44,28 @@ for (file_num in 1:n){
   border <- image_threshold(border, type = "black", threshold = "90%")
   border <- image_transparent(border, "white", fuzz = 0)
   # image_browse(border)
-  m_img <- image_read(f)
+  
+  m_img <- image_read(filesource)
   m_gray <- image_convert(m_img, format = "PGM", colorspace = "Gray")
   # image_write(m_gray, path=paste(path,"gray", file_num,file_type, sep=""), format = "png")
   combo <- image_composite(image_flop(border), m_gray, operator = "in")
   # image_browse(combo)
-  image_write(combo, path="cut_gray.png", format = "png")
+  # image_write(combo, path="cut_gray.png", format = "png")
 
   #binarize - magick
   combo <- image_binarization(combo, type = "wolf")
   # image_browse(combo)
 
   #write to file
-  path <- "facsimiles/facsimile-"
-  file_type <- ".png"
-  f <- paste(path,file_num,file_type, sep="")
+  filetype <- "_c.png"
+  
+  f = substr(f,0,nchar(f)-5)
+  filewrite <- paste(writepath,f,filetype, sep="")
   # image_write(combo, path=f, format = "png")
   comparison <- image_append(c(m_img, combo))
-  image_write(image_scale(comparison, "1000x"), path=f, format = "png")
+  image_write(image_scale(comparison, "1000x"), path= filewrite, format = "png")
   # image_browse(image_scale(comparison, "1000x"))
+  # break
 }
 
 
