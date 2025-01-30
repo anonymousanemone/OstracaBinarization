@@ -1,15 +1,15 @@
+###### testing out different methods of binarizing grayscale images
+
 library(magick)
 library(image.binarization)
 library(imager)
 library(imagerExtra)
 
 #read in grayscale image
-
 file_num <- "8"
 # file <- paste("processed_images/grayscale_bulk/gray-",file_num,".png", sep="")
 file <- paste("processed_images/grayscale_bulk/satextract-",file_num,".png", sep="")
 img <- image_read(file)
-
 
 #ThresholdTriclass - also pretty good
 im <- load.image(file)

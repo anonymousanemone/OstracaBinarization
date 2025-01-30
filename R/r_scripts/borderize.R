@@ -1,3 +1,6 @@
+###### composite the segmented sherd outline with the binarized text
+
+
 library(magick)
 
 #read

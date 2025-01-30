@@ -1,3 +1,5 @@
+###### using grayscale image, generate binary images using 12 different algorithms and save
+
 library(magick)
 library(image.binarization)
 

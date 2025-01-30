@@ -5,7 +5,7 @@ library(imager)
 library(dplyr)
 
 sourcepath = "/Users/sophial/Documents/githubs/OstracaBinarization/Images/cropped_images/"
-writepath = "/Users/sophial/Documents/githubs/OstracaBinarization/R/Tests/binarized_with_accnum/"
+writepath = "/Users/sophial/Documents/githubs/OstracaBinarization/R/Tests/final_accnum/"
 filenames = list.files(path=sourcepath, pattern="*.jpeg")
 print(filenames)
 for (f in filenames){
@@ -57,13 +57,14 @@ for (f in filenames){
   # image_browse(combo)
 
   #write to file
-  filetype <- "_c.png"
+  filetype <- ".png"
   
   f = substr(f,0,nchar(f)-5)
   filewrite <- paste(writepath,f,filetype, sep="")
-  # image_write(combo, path=f, format = "png")
-  comparison <- image_append(c(m_img, combo))
-  image_write(image_scale(comparison, "1000x"), path= filewrite, format = "png")
+  image_write(combo, path=filewrite, format = "png")
+  
+  # comparison <- image_append(c(m_img, combo))
+  # image_write(image_scale(comparison, "1000x"), path= filewrite, format = "png")
   # image_browse(image_scale(comparison, "1000x"))
   # break
 }
