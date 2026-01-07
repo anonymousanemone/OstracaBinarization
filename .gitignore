@@ -1,8 +1,7 @@
 /R/Tests
-/Python/.venv
 .Rproj.user
 /Images/
-/Python/output
 /results
 /data
 /pypotrace
+*.pth
