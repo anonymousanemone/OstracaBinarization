@@ -5,3 +5,5 @@
 /data
 /pypotrace
 *.pth
+/static/outputs
+/static/uploads

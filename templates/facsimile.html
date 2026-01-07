@@ -1,0 +1,267 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="row">
+
+  <!-- LEFT COLUMN: CONTROLS -->
+  <div class="col-lg-6">
+    <div class="card p-3 mb-3">
+      <form method="POST" action="{{ url_for('facsimile') }}" enctype="multipart/form-data">
+
+        <!-- Image upload -->
+        <div class="mb-3">
+          <label class="form-label">Upload image(s)</label>
+          {% if uploaded_files %} 
+            <input type="file" class="form-control" name="images"
+            id="imageInput" accept="image/*" multiple>
+          {% else %}
+            <input type="file" class="form-control" name="images"
+            id="imageInput" accept="image/*" multiple required>
+          {% endif %}
+          <div id="fileList" class="form-text mt-1 file-list-scroll">
+            {% if uploaded_files %}
+              <ul class="mb-0 ps-3 file-list-columns">
+                {% for fname in uploaded_files %}
+                  <li>{{ fname }}</li>
+                  <input type="hidden" name="saved_files" value="{{ fname }}">
+                {% endfor %}
+              </ul>
+            {% endif %}
+          </div>
+        </div>
+
+        <hr>
+
+        <!-- BINARIZATION -->
+        <h6>Binarization Method</h6>
+        <div class="row g-2 mb-2">
+          <div class="col-md-6">
+            <select class="form-select" name="bin_method">
+              {% set selected_method = opts.binarize.method if opts else 'WOLF' %}
+              {% for algo in ['OTSU','BERNSEN','NIBLACK','SAUVOLA','WOLF','GATOS','NICK','SU','TRSINGH','BATAINEH','ISAUVOLA','WAN'] %}
+                <option value="{{ algo }}" {% if algo==selected_method %}selected{% endif %}>{{ algo }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+
+        <!-- Toggle advanced binarization -->
+        <button type="button" class="btn btn-sm btn-outline-secondary mb-2" data-bs-toggle="collapse"
+          data-bs-target="#binarize-advanced">
+          Advanced Options
+        </button>
+
+        <div class="collapse" id="binarize-advanced">
+          <div class="row g-2 mb-2">
+            <div class="col-md-4">
+              <label>Bilateral d</label>
+              <input type="number" class="form-control" name="seg_bilat_d" value="{{ opts.binarize.bilateral.d if opts else 5 }}">
+            </div>
+            <div class="col-md-4">
+              <label>σ Color</label>
+              <input type="number" class="form-control" name="bin_bilat_sc" value="{{ opts.binarize.bilateral.sigma_color if opts else 20 }}">
+            </div>
+            <div class="col-md-4">
+              <label>σ Space</label>
+              <input type="number" class="form-control" name="bin_bilat_ss" value="{{ opts.binarize.bilateral.sigma_space if opts else 20 }}">
+            </div>
+          </div>
+          <div class="row g-2 mb-2">
+            <div class="col-md-4">
+              <label>Median k</label>
+              <input type="number" class="form-control" name="bin_med" value="{{ opts.binarize.median_k if opts else 10 }}">
+            </div>
+            <div class="col-md-4">
+              <label>Morph open</label>
+              <input type="number" class="form-control" name="bin_open" value="{{ opts.binarize.morph_open_k if opts else 5 }}">
+            </div>
+            <div class="col-md-4">
+              <label>Morph close</label>
+              <input type="number" class="form-control" name="bin_close" value="{{ opts.binarize.morph_close_k if opts else 0 }}">
+            </div>
+          </div>
+        </div>
+
+        <hr>
+
+        <!-- SEGMENTATION -->
+        <h6>Segmentation Method</h6>
+        <div class="row g-2 mb-2">
+          <div class="col-md-6">
+            <select class="form-select" name="seg_method" id="seg_method" onchange="toggleSegmentationOptions()">
+              {% set seg_method = opts.segment.method if opts else 'saturation' %}
+              <option value="kmeans" {% if seg_method=='kmeans' %}selected{% endif %}>KMeans</option>
+              <option value="saturation" {% if seg_method=='saturation' %}selected{% endif %}>Saturation</option>
+              
+            </select>
+          </div>
+        </div>
+
+        
+
+        <!-- Toggle advanced segmentation -->
+        <button type="button" class="btn btn-sm btn-outline-secondary mt-2 mb-2" data-bs-toggle="collapse"
+          data-bs-target="#segment-advanced">
+          Advanced segmentation
+        </button>
+
+        <div id="segment-advanced" class="collapse">
+          <!-- COLOR SEGMENTATION -->
+        <div id="color-options">
+          <label class="form-label">Saturation Threshold Adjustment</label>
+          <input class="form-range" type="range" name="thresh_adjust" min="-30" max="30" value="{{ opts.segment.thresh_adjust if opts else 0 }}">
+          <!-- <input type="number" class="form-control" name="thresh_adjust" value="{{ opts.segment.thresh_adjust if opts else 0 }}"> -->
+        </div>
+
+        <!-- KMEANS SEGMENTATION -->
+        <div id="kmeans-options" style="display:none">
+          <label class="form-label">HSV selection</label>
+          <select class="form-select" name="kmeans_hsv">
+            <option value="HSV" selected>HSV</option>
+            <option value="H">H</option>
+            <option value="S">S</option>
+            <option value="V">V</option>
+          </select>
+        </div>
+
+          <div class="row g-2 mb-2">
+            <div class="col-md-4">
+              <label>Bilateral d</label>
+              <input type="number" class="form-control" name="seg_bilat_d" value="{{ opts.segment.bilateral.d if opts else 5 }}">
+            </div>
+            <div class="col-md-4">
+              <label>σ Color</label>
+              <input type="number" class="form-control" name="seg_bilat_sc" value="{{ opts.segment.bilateral.sigma_color if opts else 50 }}">
+            </div>
+            <div class="col-md-4">
+              <label>σ Space</label>
+              <input type="number" class="form-control" name="seg_bilat_ss" value="{{ opts.segment.bilateral.sigma_space if opts else 20 }}">
+            </div>
+          </div>
+          <div class="row g-2">
+            <div class="col-md-4">
+              <label>Morph close</label>
+              <input type="number" class="form-control" name="seg_close" value="{{ opts.segment.morph_close_k if opts else 20 }}">
+            </div>
+          </div>
+        </div>
+        <hr>
+
+        <!-- OVERLAY -->
+        <div class="form-check mb-3">
+          <input class="form-check-input" type="checkbox" name="overlay" id="overlay" {% if opts and opts.overlay %}checked{% endif %}>
+          <label class="form-check-label" for="overlay">Overlay contour on original</label>
+        </div>
+
+        <button type="submit" class="btn btn-primary w-100" id="processButton" >
+          Process
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- RIGHT COLUMN: OUTPUT -->
+<div class="col-lg-6">
+  <div class="card p-3 mb-3">
+    <h6>Result</h6>
+
+    <!-- Large selected image -->
+     <div class="large-image-container">
+      <img
+        id="mainImage"
+        src="{{ result_image if result_image else url_for('static', filename='images/placeholder.png') }}"
+        class="img-fluid large-image"
+        alt="Result image"
+      >
+    </div>
+
+    <!-- Scrollable thumbnail strip -->
+    <div class="thumbnail-scroll border-top pt-2">
+      <div class="row g-2">
+        {% for filename in uploaded_files %}
+        <div class="col-3">
+          <img
+            src="{{ url_for('static', filename='outputs/' ~ filename) }}"
+            class="img-fluid border thumbnail-img"
+            style="cursor: pointer;"
+            onclick="selectImage(this.src)"
+          >
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+</div>
+
+
+<script>
+  function toggleSegmentationOptions() {
+    const method = document.getElementById("seg_method").value;
+    document.getElementById("color-options").style.display =
+      method === "color" ? "block" : "none";
+    document.getElementById("kmeans-options").style.display =
+      method === "kmeans" ? "block" : "none";
+  }
+  function selectImage(src) {
+    document.getElementById("mainImage").src = src;
+  }
+  document.getElementById("processForm").addEventListener("submit", function() {
+    const btn = document.getElementById("processButton");
+    btn.disabled = true;
+    btn.textContent = "Processing...";
+});
+</script>
+
+<style>
+
+.large-image-container {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #f8f9fa; 
+}
+
+.large-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain; 
+}
+
+
+.thumbnail-scroll {
+  max-height: calc(2 * 120px); 
+  overflow-y: auto;
+}
+
+.thumbnail-img {
+  object-fit: cover;
+  height: 110px;
+  width: 100%;
+}
+
+.file-list-scroll {
+  max-height: 200px; 
+  overflow-y: auto;
+  border: 1px solid #dee2e6;
+  padding: 0.5rem;
+  background-color: #f8f9fa;
+}
+
+.file-list-columns {
+  column-count: 2;
+  column-gap: 1rem;
+  list-style-type: disc;
+  padding-left: 1rem;
+}
+
+
+</style>
+
+{% endblock %}
